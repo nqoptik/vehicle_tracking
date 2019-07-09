@@ -13,7 +13,7 @@ make
 ## Run project
 Copy test data to build folder:
 ```
-cp -r ../../../computer_vision_basics_data/vehicle_tracking/build/* .
+cp -r ../../computer_vision_basics_data/vehicle_tracking/build/* .
 ```
 
 Run vehicle tracking:
