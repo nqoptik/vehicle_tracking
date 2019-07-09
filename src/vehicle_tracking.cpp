@@ -1,5 +1,5 @@
-#include <iostream>
 #include <ctime>
+#include <iostream>
 #include <sstream>
 
 #include <opencv2/core/core.hpp>
@@ -57,10 +57,12 @@ cv::Point kalmanPredict(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], in
 cv::Point kalmanCorrect(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex, float x, float y);
 int EuclidDistance(int x1, int y1, int x2, int y2);
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     cv::VideoCapture video(argv[1]);
 
-    if (!video.isOpened()) {
+    if (!video.isOpened())
+    {
         std::cout << "Video not found." << std::endl;
         return 0;
     }
@@ -76,7 +78,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void excute(cv::VideoCapture& video, cv::Mat& background) {
+void excute(cv::VideoCapture& video, cv::Mat& background)
+{
     cv::Mat frame, difference, foreground, foreArea;
     int realIndexOfFrame, curF;
     int numOfDetectedObjects[numOfBufferFrames];
@@ -88,13 +91,15 @@ void excute(cv::VideoCapture& video, cv::Mat& background) {
     realIndexOfFrame = 0;
     setupTrails(numOfDetectedObjects, numOfPredictedObjects, trails, KalmanStatus);
     double t1 = clock();
-    for (;;) {
+    for (;;)
+    {
         cv::imshow("background", background);
         curF = realIndexOfFrame % numOfBufferFrames;
 
         video >> frame;
 
-        if (frame.empty()) {
+        if (frame.empty())
+        {
             break;
             std::cout << "End of video." << std::endl;
         }
@@ -117,30 +122,42 @@ void excute(cv::VideoCapture& video, cv::Mat& background) {
         std::vector<std::vector<bool>> ticks;
         findPaths(numOfDetectedObjects, numOfPredictedObjects, trails, curF, paths, ticks);
 
-        for (unsigned int i = 0; i < paths.size(); i++) {
-            if (paths[i].size() > 1) {
-                for (unsigned int j = 0; j < paths[i].size() - 1; j++) {
-                    if (ticks[i][j]) {
+        for (unsigned int i = 0; i < paths.size(); i++)
+        {
+            if (paths[i].size() > 1)
+            {
+                for (unsigned int j = 0; j < paths[i].size() - 1; j++)
+                {
+                    if (ticks[i][j])
+                    {
                         cv::line(frame, paths[i][j], paths[i][j + 1], cv::Scalar(0, 255 - j * 2, 0), 2);
-                    } else {
+                    }
+                    else
+                    {
                         cv::line(frame, paths[i][j], paths[i][j + 1], cv::Scalar(0, 0, 255 - j * 2), 2);
                     }
                 }
             }
 
-            if (paths[i].size() > maxDegreeOfPrediction) {
+            if (paths[i].size() > maxDegreeOfPrediction)
+            {
                 int length = 0;
 
-                for (int j = 0; j < maxDegreeOfPrediction; j++) {
-                    if (paths[i][j].y < 240) {
+                for (int j = 0; j < maxDegreeOfPrediction; j++)
+                {
+                    if (paths[i][j].y < 240)
+                    {
                         length += round(EuclidDistance(paths[i][j].x, paths[i][j].y, paths[i][j + 1].x, paths[i][j + 1].y) * (2.7 - paths[i][j].y * 2.7 / frame.rows));
-                    } else {
+                    }
+                    else
+                    {
                         length += EuclidDistance(paths[i][j].x, paths[i][j].y, paths[i][j + 1].x, paths[i][j + 1].y);
                     }
                 }
                 length = round(2 * length / (float)maxDegreeOfPrediction);
 
-                if (ticks[i][0]) {
+                if (ticks[i][0])
+                {
                     std::string str = std::to_string(length);
                     str.append("km/h");
                     cv::Point textPosition = cv::Point(trails[curF][i][1] - 40, trails[curF][i][2] - 5);
@@ -148,7 +165,8 @@ void excute(cv::VideoCapture& video, cv::Mat& background) {
                 }
             }
 
-            if (ticks[i][0] && paths[i].size() > maxDegreeOfPrediction) {
+            if (ticks[i][0] && paths[i].size() > maxDegreeOfPrediction)
+            {
                 std::string str = std::to_string(trails[curF][i][5]);
                 cv::Point textPosition = cv::Point(trails[curF][i][1] - 40, trails[curF][i][2] + 25);
                 cv::putText(frame, str, textPosition, cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255, 0, 255), 2, 8);
@@ -171,12 +189,15 @@ void excute(cv::VideoCapture& video, cv::Mat& background) {
     std::cout << t2 - t1;
 }
 
-void setupTrails(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObjects[numOfBufferFrames], int trails[numOfBufferFrames][maxNumOfTrackedObjectsPerFrame][numOfTrailFields], int KalmanStatus[maxNumOfDetectedObjectsPerFrame]) {
-    for (int i = 0; i < numOfBufferFrames; i++) {
+void setupTrails(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObjects[numOfBufferFrames], int trails[numOfBufferFrames][maxNumOfTrackedObjectsPerFrame][numOfTrailFields], int KalmanStatus[maxNumOfDetectedObjectsPerFrame])
+{
+    for (int i = 0; i < numOfBufferFrames; i++)
+    {
         numOfDetectedObjects[i] = 0;
         numOfPredictedObjects[i] = 0;
 
-        for (int j = 0; j < maxNumOfTrackedObjectsPerFrame; j++) {
+        for (int j = 0; j < maxNumOfTrackedObjectsPerFrame; j++)
+        {
             trails[i][j][0] = 0;
             trails[i][j][1] = 0;
             trails[i][j][2] = 0;
@@ -186,12 +207,14 @@ void setupTrails(int numOfDetectedObjects[numOfBufferFrames], int numOfPredicted
         }
     }
 
-    for (int i = 0; i < maxNumOfDetectedObjectsPerFrame; i++) {
+    for (int i = 0; i < maxNumOfDetectedObjectsPerFrame; i++)
+    {
         KalmanStatus[i] = -1;
     }
 }
 
-cv::Mat getForegroundFromDifference(cv::Mat difference) {
+cv::Mat getForegroundFromDifference(cv::Mat difference)
+{
     cv::Mat foreground;
     cv::threshold(difference, foreground, thresholdForDifference, 255, CV_THRESH_BINARY);
     cv::cvtColor(foreground, foreground, CV_BGR2GRAY);
@@ -206,21 +229,27 @@ cv::Mat getForegroundFromDifference(cv::Mat difference) {
     return foreground;
 }
 
-void eliminateExternalRegions(cv::Mat& foreground) {
-    for (int i = 0; i < commonSize.height; i++) {
-        for (int j = 0; j < 190 - i / 3; j++) {
+void eliminateExternalRegions(cv::Mat& foreground)
+{
+    for (int i = 0; i < commonSize.height; i++)
+    {
+        for (int j = 0; j < 190 - i / 3; j++)
+        {
             foreground.at<uchar>(i, j) = 0;
         }
     }
 
-    for (int i = 0; i < commonSize.height; i++) {
-        for (int j = 450 + i / 3; j < commonSize.width; j++) {
+    for (int i = 0; i < commonSize.height; i++)
+    {
+        for (int j = 450 + i / 3; j < commonSize.width; j++)
+        {
             foreground.at<uchar>(i, j) = 0;
         }
     }
 }
 
-void getObjectInfomationFromForeground(cv::Mat foreground, cv::Mat& foreArea, std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Rect>& boundRects) {
+void getObjectInfomationFromForeground(cv::Mat foreground, cv::Mat& foreArea, std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Rect>& boundRects)
+{
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(foreground, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
@@ -228,33 +257,41 @@ void getObjectInfomationFromForeground(cv::Mat foreground, cv::Mat& foreArea, st
 
     correctContours(foreArea, contours, hierarchy);
 
-    for (unsigned int i = 0; i < contours.size(); i++) {
+    for (unsigned int i = 0; i < contours.size(); i++)
+    {
         boundRects.push_back(boundingRect(contours[i]));
     }
 
     eliminateBorderObjects(contours, boundRects);
 }
 
-void eliminateSmallContours(std::vector<std::vector<cv::Point>>& contours) {
+void eliminateSmallContours(std::vector<std::vector<cv::Point>>& contours)
+{
     int i = contours.size() - 1;
-    while (i >= 0) {
-        if (cv::contourArea(contours[i]) < minObjestArea) {
+    while (i >= 0)
+    {
+        if (cv::contourArea(contours[i]) < minObjestArea)
+        {
             contours.erase(contours.begin() + i, contours.begin() + i + 1);
         }
         i--;
     }
 }
 
-void correctContours(cv::Mat& foreArea, std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Vec4i> hierarchy) {
-    for (unsigned int i = 0; i < contours.size(); i++) {
-        if (contours[i].size() > 3) {
+void correctContours(cv::Mat& foreArea, std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Vec4i> hierarchy)
+{
+    for (unsigned int i = 0; i < contours.size(); i++)
+    {
+        if (contours[i].size() > 3)
+        {
             cv::convexHull(cv::Mat(contours[i]).clone(), contours[i]);
         }
     }
 
     foreArea = cv::Mat::zeros(commonSize, CV_8UC3);
 
-    for (size_t i = 0; i < contours.size(); i++) {
+    for (size_t i = 0; i < contours.size(); i++)
+    {
         cv::drawContours(foreArea, contours, i, cv::Scalar(255, 255, 255), CV_FILLED);
     }
     cv::Mat contoursImg;
@@ -263,33 +300,42 @@ void correctContours(cv::Mat& foreArea, std::vector<std::vector<cv::Point>>& con
     cv::findContours(contoursImg, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 }
 
-void eliminateBorderObjects(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Rect>& boundRects) {
-    for (unsigned int i = 0; i < boundRects.size(); i++) {
-        if (boundRects[i].tl().x < 5) {
+void eliminateBorderObjects(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Rect>& boundRects)
+{
+    for (unsigned int i = 0; i < boundRects.size(); i++)
+    {
+        if (boundRects[i].tl().x < 5)
+        {
             boundRects.erase(boundRects.begin() + i, boundRects.begin() + i + 1);
             contours.erase(contours.begin() + i, contours.begin() + i + 1);
             i = MAX(0, i - 1);
         }
     }
 
-    for (unsigned int i = 0; i < boundRects.size(); i++) {
-        if (boundRects[i].tl().y < 5) {
+    for (unsigned int i = 0; i < boundRects.size(); i++)
+    {
+        if (boundRects[i].tl().y < 5)
+        {
             boundRects.erase(boundRects.begin() + i, boundRects.begin() + i + 1);
             contours.erase(contours.begin() + i, contours.begin() + i + 1);
             i = MAX(0, i - 1);
         }
     }
 
-    for (unsigned int i = 0; i < boundRects.size(); i++) {
-        if (boundRects[i].br().y > commonSize.height - 30) {
+    for (unsigned int i = 0; i < boundRects.size(); i++)
+    {
+        if (boundRects[i].br().y > commonSize.height - 30)
+        {
             boundRects.erase(boundRects.begin() + i, boundRects.begin() + i + 1);
             contours.erase(contours.begin() + i, contours.begin() + i + 1);
             i = MAX(0, i - 1);
         }
     }
 
-    for (unsigned int i = 0; i < boundRects.size(); i++) {
-        if (boundRects[i].br().x > commonSize.width - 30) {
+    for (unsigned int i = 0; i < boundRects.size(); i++)
+    {
+        if (boundRects[i].br().x > commonSize.width - 30)
+        {
             boundRects.erase(boundRects.begin() + i, boundRects.begin() + i + 1);
             contours.erase(contours.begin() + i, contours.begin() + i + 1);
             i = MAX(0, i - 1);
@@ -297,14 +343,16 @@ void eliminateBorderObjects(std::vector<std::vector<cv::Point>>& contours, std::
     }
 }
 
-void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObjects[numOfBufferFrames], int trails[numOfBufferFrames][maxNumOfTrackedObjectsPerFrame][numOfTrailFields], int curF, std::vector<std::vector<cv::Point>> contours, std::vector<cv::Rect> boundRects, cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanStatus[maxNumOfDetectedObjectsPerFrame]) {
+void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObjects[numOfBufferFrames], int trails[numOfBufferFrames][maxNumOfTrackedObjectsPerFrame][numOfTrailFields], int curF, std::vector<std::vector<cv::Point>> contours, std::vector<cv::Rect> boundRects, cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanStatus[maxNumOfDetectedObjectsPerFrame])
+{
     int preF = (curF + numOfBufferFrames - 1) % numOfBufferFrames;
     int nexF = (curF + 1) % numOfBufferFrames;
 
     numOfDetectedObjects[curF] = contours.size();
     numOfPredictedObjects[nexF] = 0;
     int nexJ;
-    for (int curI = 0; curI < numOfDetectedObjects[curF]; curI++) {
+    for (int curI = 0; curI < numOfDetectedObjects[curF]; curI++)
+    {
         nexJ = maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[nexF];
 
         ///Step 1: get object information
@@ -314,13 +362,16 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
 
         int minMovingDistance = maxMovingDistance + 1;
         int preI = -1;
-        for (int pI = 0; pI < numOfDetectedObjects[preF]; pI++) {
-            if (trails[preF][pI][4] != -2) {
+        for (int pI = 0; pI < numOfDetectedObjects[preF]; pI++)
+        {
+            if (trails[preF][pI][4] != -2)
+            {
                 int x2 = trails[preF][pI][1];
                 int y2 = trails[preF][pI][2];
                 int Ed = EuclidDistance(mx, my, x2, y2);
 
-                if (Ed < minMovingDistance) {
+                if (Ed < minMovingDistance)
+                {
                     minMovingDistance = Ed;
                     preI = pI;
                 }
@@ -329,7 +380,8 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
 
         //assume that the nearest object is preI
         float areaDiff = trails[curF][curI][0] / (float)trails[preF][preI][0];
-        if (minMovingDistance < maxMovingDistance && areaDiff < maxChangingAreaRate && areaDiff > 1 / maxChangingAreaRate) {
+        if (minMovingDistance < maxMovingDistance && areaDiff < maxChangingAreaRate && areaDiff > 1 / maxChangingAreaRate)
+        {
             //we have an object which moves normally
             //trails[preF][preI] ==> trails[curF][curI]
             int KalmanIndex = trails[preF][preI][5];
@@ -349,18 +401,23 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
             trails[nexF][nexJ][3] = curI;
             trails[nexF][nexJ][4] = 1;
             trails[nexF][nexJ][5] = KalmanIndex;
-        } else {
+        }
+        else
+        {
             //we haven't an object which moves normally
             minMovingDistance = maxMovingDistance + 1;
             int preJ = -1;
 
-            for (int pJ = maxNumOfDetectedObjectsPerFrame; pJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[preF]; pJ++) {
-                if (trails[preF][pJ][4] != -2) {
+            for (int pJ = maxNumOfDetectedObjectsPerFrame; pJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[preF]; pJ++)
+            {
+                if (trails[preF][pJ][4] != -2)
+                {
                     int x2 = trails[preF][pJ][1];
                     int y2 = trails[preF][pJ][2];
                     int Ed = EuclidDistance(mx, my, x2, y2);
 
-                    if (Ed < minMovingDistance) {
+                    if (Ed < minMovingDistance)
+                    {
                         minMovingDistance = Ed;
                         preJ = pJ;
                     }
@@ -370,7 +427,8 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
             //assume that the nearest object is preJ
             areaDiff = trails[curF][curI][0] / (float)trails[preF][preJ][0];
             float curMaxRate = maxChangingAreaRate + 0.02f * trails[preF][preJ][4];
-            if (minMovingDistance < maxMovingDistance && areaDiff < curMaxRate && areaDiff > 1 / curMaxRate) {
+            if (minMovingDistance < maxMovingDistance && areaDiff < curMaxRate && areaDiff > 1 / curMaxRate)
+            {
                 //we have an object which is predicted correctly. Previously, It was lost track and now get track again
                 //trails[preF][preJ] ==> trails[curF][curI]
                 int KalmanIndex = trails[preF][preJ][5];
@@ -390,11 +448,14 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
                 trails[nexF][nexJ][3] = curI;
                 trails[nexF][nexJ][4] = 1;
                 trails[nexF][nexJ][5] = KalmanIndex;
-            } else {
+            }
+            else
+            {
                 //we have a new object
                 //nothing ==> trails[curF][curI]
                 int KalmanIndex = 0;
-                while (KalmanIndex < maxNumOfDetectedObjectsPerFrame && KalmanStatus[KalmanIndex] != -1) {
+                while (KalmanIndex < maxNumOfDetectedObjectsPerFrame && KalmanStatus[KalmanIndex] != -1)
+                {
                     KalmanIndex++;
                 }
                 KalmanStatus[KalmanIndex] = 1;
@@ -420,9 +481,11 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
     }
 
     ///Step 3: In current frame, we have some predicted object (curJ) is the same as detected object or has a too big prediction degree,so we need eliminating them.
-    for (int curJ = maxNumOfDetectedObjectsPerFrame; curJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[curF]; curJ++) {
+    for (int curJ = maxNumOfDetectedObjectsPerFrame; curJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[curF]; curJ++)
+    {
         int KalmanIndex = trails[curF][curJ][5];
-        if (trails[curF][curJ][4] > maxDegreeOfPrediction) {
+        if (trails[curF][curJ][4] > maxDegreeOfPrediction)
+        {
             //This object has predicted too many times but has not taken any result, need eliminating trails[curF][curJ]
             //int KalmanIndex = trails[curF][curJ][5];
             KalmanStatus[KalmanIndex] = -1;
@@ -432,18 +495,22 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
             trails[curF][curJ][3] = -1;
             trails[curF][curJ][4] = -1;
             trails[curF][curJ][5] = -1;
-        } else {
+        }
+        else
+        {
             //This object has predicted not too many times, may be we should keep track
             int minMovingDistance = maxMovingDistance + 1;
             int curI = -1;
-            for (int cI = 0; cI < numOfDetectedObjects[curF]; cI++) {
+            for (int cI = 0; cI < numOfDetectedObjects[curF]; cI++)
+            {
                 int x1 = trails[curF][curJ][1];
                 int y1 = trails[curF][curJ][2];
                 int x2 = trails[curF][cI][1];
                 int y2 = trails[curF][cI][2];
                 int Ed = EuclidDistance(x1, y1, x2, y2);
 
-                if (Ed < minMovingDistance) {
+                if (Ed < minMovingDistance)
+                {
                     minMovingDistance = Ed;
                     curI = cI;
                 }
@@ -452,8 +519,10 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
             //assume the the nearest object is curI
             float areaDiff = trails[curF][curJ][0] / (float)trails[curF][curI][0];
             float curMaxRate = maxChangingAreaRate + 0.02f * trails[curF][curJ][4];
-            if (minMovingDistance < maxMovingDistance && areaDiff < curMaxRate && areaDiff > 1 / curMaxRate) {
-                if (trails[curF][curI][5] == trails[curF][curJ][5]) {
+            if (minMovingDistance < maxMovingDistance && areaDiff < curMaxRate && areaDiff > 1 / curMaxRate)
+            {
+                if (trails[curF][curI][5] == trails[curF][curJ][5])
+                {
                     //is the same object, need eliminating trails[curF][curJ]
                     trails[curF][curJ][0] = 0;
                     trails[curF][curJ][1] = 0;
@@ -468,8 +537,10 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
 
     ///Step 4: predict the next frame from predicted object in current frame
 
-    for (int curJ = maxNumOfDetectedObjectsPerFrame; curJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[curF]; curJ++) {
-        if (trails[curF][curJ][4] != -1) {
+    for (int curJ = maxNumOfDetectedObjectsPerFrame; curJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[curF]; curJ++)
+    {
+        if (trails[curF][curJ][4] != -1)
+        {
             //This object still remains after step 3, so it quite different than detected object and not too many prediction times
             //now we predict next frame
             nexJ = maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[nexF];
@@ -488,7 +559,8 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
     }
 }
 
-void updateBackground(cv::Mat frame, cv::Mat foreArea, cv::Mat& background, int realIndexOfFrame) {
+void updateBackground(cv::Mat frame, cv::Mat foreArea, cv::Mat& background, int realIndexOfFrame)
+{
     cv::Mat combinedArea, backArea, joinedArea;
     combinedArea = (frame + background * 4) / 5;
     cv::bitwise_not(foreArea, backArea);
@@ -498,15 +570,20 @@ void updateBackground(cv::Mat frame, cv::Mat foreArea, cv::Mat& background, int 
     cv::bitwise_or(foreArea, backArea, joinedArea);
     cv::imshow("joinedArea", joinedArea);
 
-    if (realIndexOfFrame < weightOfBackground) {
+    if (realIndexOfFrame < weightOfBackground)
+    {
         background = (frame + background * realIndexOfFrame) / (realIndexOfFrame + 1);
-    } else {
+    }
+    else
+    {
         background = (joinedArea * 2 + background * weightOfBackground) / (weightOfBackground + 2);
     }
 }
 
-void findPaths(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObjects[numOfBufferFrames], int trails[numOfBufferFrames][maxNumOfTrackedObjectsPerFrame][numOfTrailFields], int curF, std::vector<std::vector<cv::Point>>& paths, std::vector<std::vector<bool>>& ticks) {
-    for (int curI = 0; curI < numOfDetectedObjects[curF]; curI++) {
+void findPaths(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObjects[numOfBufferFrames], int trails[numOfBufferFrames][maxNumOfTrackedObjectsPerFrame][numOfTrailFields], int curF, std::vector<std::vector<cv::Point>>& paths, std::vector<std::vector<bool>>& ticks)
+{
+    for (int curI = 0; curI < numOfDetectedObjects[curF]; curI++)
+    {
         std::vector<cv::Point> pathI;
         std::vector<bool> tickI;
         int currentFrame = curF;
@@ -517,21 +594,28 @@ void findPaths(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedOb
         cv::Point prePoint;
         int preFrame;
 
-        for (;;) {
+        for (;;)
+        {
             preFrame = (currentFrame + numOfBufferFrames - 1) % numOfBufferFrames;
             int preObjectIndex = trails[currentFrame][objectIndex][3];
-            if (preObjectIndex != -1) {
+            if (preObjectIndex != -1)
+            {
                 prePoint = cv::Point(trails[preFrame][preObjectIndex][1], trails[preFrame][preObjectIndex][2]);
-                if (MAX(preObjectIndex, objectIndex) < maxNumOfDetectedObjectsPerFrame) {
+                if (MAX(preObjectIndex, objectIndex) < maxNumOfDetectedObjectsPerFrame)
+                {
                     tickI.push_back(true);
-                } else {
+                }
+                else
+                {
                     tickI.push_back(false);
                 }
                 objectIndex = preObjectIndex;
                 currentFrame = preFrame;
                 currentPoint = prePoint;
                 pathI.push_back(currentPoint);
-            } else {
+            }
+            else
+            {
                 break;
             }
         }
@@ -540,8 +624,10 @@ void findPaths(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedOb
         ticks.push_back(tickI);
     }
 
-    for (int curJ = maxNumOfDetectedObjectsPerFrame; curJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[curF]; curJ++) {
-        if (trails[curF][curJ][4] != -1) {
+    for (int curJ = maxNumOfDetectedObjectsPerFrame; curJ < maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[curF]; curJ++)
+    {
+        if (trails[curF][curJ][4] != -1)
+        {
             std::vector<cv::Point> pathI;
             std::vector<bool> tickI;
             int currentFrame = curF;
@@ -552,22 +638,28 @@ void findPaths(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedOb
             cv::Point prePoint;
             int preFrame;
 
-            for (;;) {
+            for (;;)
+            {
                 preFrame = (currentFrame + numOfBufferFrames - 1) % numOfBufferFrames;
                 int preObjectIndex = trails[currentFrame][objectIndex][3];
-                if (preObjectIndex != -1) {
+                if (preObjectIndex != -1)
+                {
                     prePoint = cv::Point(trails[preFrame][preObjectIndex][1], trails[preFrame][preObjectIndex][2]);
-                    if (MAX(preObjectIndex, objectIndex) < maxNumOfDetectedObjectsPerFrame) {
+                    if (MAX(preObjectIndex, objectIndex) < maxNumOfDetectedObjectsPerFrame)
+                    {
                         tickI.push_back(true);
-                    } else {
+                    }
+                    else
+                    {
                         tickI.push_back(false);
                     }
                     objectIndex = preObjectIndex;
                     currentFrame = preFrame;
                     currentPoint = prePoint;
                     pathI.push_back(currentPoint);
-
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
@@ -578,13 +670,16 @@ void findPaths(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedOb
     }
 }
 
-void drawBoundingBox(cv::Mat& image, std::vector<cv::Rect> boundRects) {
-    for (unsigned int i = 0; i < boundRects.size(); i++) {
+void drawBoundingBox(cv::Mat& image, std::vector<cv::Rect> boundRects)
+{
+    for (unsigned int i = 0; i < boundRects.size(); i++)
+    {
         cv::rectangle(image, boundRects[i].tl(), boundRects[i].br(), cv::Scalar(255, 0, 0), 2, 8, 0);
     }
 }
 
-void initKalman(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex, float x, float y) {
+void initKalman(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex, float x, float y)
+{
     KF[KalmanIndex].init(4, 2, 0);
     cv::Mat_<float> measurement(2, 1);
     measurement = cv::Mat_<float>::zeros(2, 1);
@@ -606,13 +701,15 @@ void initKalman(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int Kalman
     cv::setIdentity(KF[KalmanIndex].errorCovPost, cv::Scalar::all(.1));
 }
 
-cv::Point kalmanPredict(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex) {
+cv::Point kalmanPredict(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex)
+{
     cv::Mat prediction = KF[KalmanIndex].predict();
     cv::Point predictPt(round(prediction.at<float>(0)), round(prediction.at<float>(1)));
     return predictPt;
 }
 
-cv::Point kalmanCorrect(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex, float x, float y) {
+cv::Point kalmanCorrect(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], int KalmanIndex, float x, float y)
+{
     cv::Mat_<float> measurement(2, 1);
     measurement(0) = x;
     measurement(1) = y;
@@ -621,7 +718,8 @@ cv::Point kalmanCorrect(cv::KalmanFilter KF[maxNumOfDetectedObjectsPerFrame], in
     return statePt;
 }
 
-int EuclidDistance(int x1, int y1, int x2, int y2) {
+int EuclidDistance(int x1, int y1, int x2, int y2)
+{
     int dx = x2 - x1;
     int dy = y2 - y1;
     return round(sqrt((float)(dx * dx + dy * dy)));
