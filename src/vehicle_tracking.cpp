@@ -59,6 +59,11 @@ int EuclidDistance(int x1, int y1, int x2, int y2);
 
 int main(int argc, char** argv)
 {
+    if (argc != 2)
+    {
+        printf("To run vehicle_tracking, type ./vehicle_tracking <video_file>\n");
+        return 1;
+    }
     cv::VideoCapture video(argv[1]);
 
     if (!video.isOpened())
@@ -544,7 +549,6 @@ void track(int numOfDetectedObjects[numOfBufferFrames], int numOfPredictedObject
             //This object still remains after step 3, so it quite different than detected object and not too many prediction times
             //now we predict next frame
             nexJ = maxNumOfDetectedObjectsPerFrame + numOfPredictedObjects[nexF];
-            int preIJ = trails[curF][curJ][3];
             int KalmanIndex = trails[curF][curJ][5];
             cv::Point p = kalmanPredict(KF, KalmanIndex);
             trails[nexF][nexJ][0] = trails[curF][curJ][0];
