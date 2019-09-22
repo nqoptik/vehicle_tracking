@@ -11,9 +11,12 @@ make
 ```
 
 ## Run project
-Copy test data to build folder:
+Clone and copy test data to build folder:
 ```
-cp -r ../../computer_vision_basics_data/vehicle_tracking/build/* .
+cd ../../
+git clone https://github.com/nqoptik/computer_vision_data.git
+cd vehicle_tracking/build/
+cp -r ../../computer_vision_data/vehicle_tracking/build/* .
 ```
 
 Run vehicle tracking:
