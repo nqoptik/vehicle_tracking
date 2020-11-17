@@ -242,9 +242,9 @@ void setup_trails(int number_of_detected_objects[number_of_buffer_frames],
 cv::Mat get_foreground_from_difference(cv::Mat difference)
 {
     cv::Mat foreground;
-    cv::threshold(difference, foreground, difference_threshold, 255, CV_THRESH_BINARY);
-    cv::cvtColor(foreground, foreground, CV_BGR2GRAY);
-    cv::threshold(foreground, foreground, 5, 255, CV_THRESH_BINARY);
+    cv::threshold(difference, foreground, difference_threshold, 255, cv::THRESH_BINARY);
+    cv::cvtColor(foreground, foreground, cv::COLOR_BGR2GRAY);
+    cv::threshold(foreground, foreground, 5, 255, cv::THRESH_BINARY);
 
     // Eliminate external regions (depends on the video)
     eliminate_external_regions(foreground);
@@ -280,7 +280,7 @@ void get_object_infomation_from_foreground(cv::Mat foreground,
                                            std::vector<cv::Rect>& boundary_rectangles)
 {
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(foreground, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    cv::findContours(foreground, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
     eliminate_small_contours(contours);
 
@@ -321,12 +321,12 @@ void correct_contours(cv::Mat& foreground_area, std::vector<std::vector<cv::Poin
 
     for (size_t i = 0; i < contours.size(); ++i)
     {
-        cv::drawContours(foreground_area, contours, i, cv::Scalar(255, 255, 255), CV_FILLED);
+        cv::drawContours(foreground_area, contours, i, cv::Scalar(255, 255, 255), cv::FILLED);
     }
     cv::Mat contours_image;
-    cv::cvtColor(foreground_area, contours_image, CV_BGR2GRAY);
+    cv::cvtColor(foreground_area, contours_image, cv::COLOR_BGR2GRAY);
 
-    cv::findContours(contours_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    cv::findContours(contours_image, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 }
 
 void eliminate_border_objects(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Rect>& boundary_rectangles)
